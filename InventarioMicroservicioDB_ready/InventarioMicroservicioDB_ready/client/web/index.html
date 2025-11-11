@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Inventario Agrícola V2 — Proveedores (Cliente Web)</title>
+
+  <style>
+    :root{
+      --bg:#f5f7fb; --surface:#fff; --text:#0f172a; --muted:#64748b;
+      --brand:#2563eb; --brand-600:#1d4ed8; --brand-700:#1e3a8a;
+      --ok:#16a34a; --warn:#f59e0b; --danger:#dc2626; --ring:#93c5fd; --border:#e2e8f0;
+      --shadow:0 10px 20px rgba(2,8,23,.06), 0 2px 6px rgba(2,8,23,.05);
+      --radius:14px; --radius-sm:10px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans";
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font)}
+    header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--brand),var(--brand-600));color:#fff;padding:18px 16px;box-shadow:var(--shadow)}
+    .container{width:min(1100px,100%);margin:0 auto;padding:0 12px}
+    .brand h1{margin:0;font-size:clamp(1.1rem,2.2vw,1.5rem);font-weight:700}
+    .brand small{opacity:.9}
+    nav{background:var(--brand-700);position:sticky;top:64px;z-index:19;box-shadow:var(--shadow)}
+    .nav-wrap{display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px}
+    .nav a{color:#e0e7ff;text-decoration:none;background:#1d4ed8;padding:10px 12px;border-radius:10px;transition:.15s;box-shadow:0 1px 0 rgba(0,0,0,.1);font-size:14px}
+    .nav a:hover{background:#1e40af;transform:translateY(-1px)}
+    .nav a.active{background:#0f172a;box-shadow:inset 0 0 0 1px #0b1220}
+    main{padding:22px 12px}
+    section.card{display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:18px}
+    section.card h2{margin:0 0 12px;font-size:1.1rem}
+    .muted{color:var(--muted);font-size:.95rem}
+    .form-row{display:grid;gap:12px;grid-template-columns:1fr}
+    @media (min-width:620px){.form-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    .field{display:flex;flex-direction:column;gap:6px}
+    label{font-size:.92rem;color:#0f172acc}
+    input[type="text"],input[type="number"],input[type="datetime-local"]{
+      padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;font-size:.98rem;outline:none;transition:.12s
+    }
+    input:focus{border-color:var(--ring);box-shadow:0 0 0 4px rgba(147,197,253,.35)}
+    .inline{display:flex;align-items:center;gap:10px}
+    .btn{border:0;border-radius:10px;padding:10px 14px;color:#fff;cursor:pointer;font-weight:600;box-shadow:0 1px 0 rgba(0,0,0,.12);transition:.12s}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{background:var(--ok)} .btn.info{background:var(--brand)} .btn.warn{background:var(--warn);color:#111827} .btn.danger{background:var(--danger)}
+    .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    textarea.out{width:100%;min-height:180px;resize:vertical;margin-top:10px;padding:12px;border:1px dashed var(--border);border-radius:var(--radius-sm);background:#0b122005;font-family:var(--mono);font-size:.92rem}
+    footer{padding:30px 12px 40px;text-align:center;color:var(--muted)}
+    .toast{position:fixed;bottom:18px;right:18px;background:#0f172a;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:var(--shadow);opacity:0;transform:translateY(6px);transition:.18s;pointer-events:none;z-index:40;font-size:.92rem}
+    .toast.show{opacity:1;transform:translateY(0)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container brand">
+      <div>
+        <h1>Inventario Agrícola V2 — Proveedores</h1>
+        <small>Cliente Web (HTML + JS) • REST @ <code>http://localhost:8080</code></small>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <div class="container nav-wrap nav">
+      <a data-section="proveedor-create">Crear</a>
+      <a data-section="proveedor-search">Buscar</a>
+      <a data-section="proveedor-update">Actualizar</a>
+      <a data-section="proveedor-delete">Eliminar</a>
+      <a data-section="proveedor-list">Listar / Filtrar</a>
+      <a data-section="about">Acerca de…</a>
+    </div>
+  </nav>
+
+  <main class="container">
+
+    <!-- Crear Proveedor -->
+    <section class="card" id="proveedor-create">
+      <h2>Crear Proveedor</h2>
+      <p class="muted">Completa los campos y pulsa “Crear”.</p>
+
+      <div class="form-row">
+        <div class="field"><label>NIT</label><input type="text" id="pc_nit" placeholder="900777000" /></div>
+        <div class="field"><label>Nombre</label><input type="text" id="pc_nombre" placeholder="Campo Norte" /></div>
+        <div class="field"><label>Ciudad</label><input type="text" id="pc_ciudad" placeholder="Medellín" /></div>
+        <div class="field"><label>Teléfono</label><input type="text" id="pc_telefono" placeholder="3001112233" /></div>
+        <div class="field"><label>Fecha Registro</label><input type="datetime-local" id="pc_fecha" /></div>
+        <div class="field inline" style="margin-top: 24px;">
+          <input type="checkbox" id="pc_activo" /><label for="pc_activo">Activo</label>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" onclick="crearProveedor()">Crear</button>
+      </div>
+      <textarea class="out" id="pc_out" readonly></textarea>
+    </section>
+
+    <!-- Buscar Proveedor -->
+    <section class="card" id="proveedor-search">
+      <h2>Buscar Proveedor</h2>
+      <div class="form-row">
+        <div class="field"><label>NIT</label><input type="text" id="ps_nit" placeholder="900777000" /></div>
+      </div>
+      <div class="actions">
+        <button class="btn info" onclick="buscarProveedor()">Buscar</button>
+      </div>
+      <textarea class="out" id="ps_out" readonly></textarea>
+    </section>
+
+    <!-- Actualizar Proveedor -->
+    <section class="card" id="proveedor-update">
+      <h2>Actualizar Proveedor</h2>
+      <div class="form-row">
+        <div class="field"><label>NIT (ruta)</label><input type="text" id="pu_nit" placeholder="900777000" /></div>
+        <div class="field"><label>Nombre</label><input type="text" id="pu_nombre" placeholder="Campo Norte S.A." /></div>
+        <div class="field"><label>Ciudad</label><input type="text" id="pu_ciudad" placeholder="Medellín" /></div>
+        <div class="field"><label>Teléfono</label><input type="text" id="pu_telefono" placeholder="3001112233" /></div>
+        <div class="field"><label>Fecha Registro</label><input type="datetime-local" id="pu_fecha" /></div>
+        <div class="field inline" style="margin-top: 24px;">
+          <input type="checkbox" id="pu_activo" /><label for="pu_activo">Activo</label>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn warn" onclick="actualizarProveedor()">Actualizar</button>
+      </div>
+      <textarea class="out" id="pu_out" readonly></textarea>
+    </section>
+
+    <!-- Eliminar Proveedor -->
+    <section class="card" id="proveedor-delete">
+      <h2>Eliminar Proveedor</h2>
+      <div class="form-row">
+        <div class="field"><label>NIT</label><input type="text" id="pd_nit" placeholder="900777000" /></div>
+      </div>
+      <div class="actions">
+        <button class="btn danger" onclick="eliminarProveedor()">Eliminar</button>
+      </div>
+      <textarea class="out" id="pd_out" readonly></textarea>
+    </section>
+
+    <!-- Listar Proveedores -->
+    <section class="card" id="proveedor-list">
+      <h2>Listar Proveedores / Filtrar</h2>
+      <div class="form-row">
+        <div class="field"><label>Nombre (contiene)</label><input type="text" id="pl_nombre" placeholder="Campo" /></div>
+        <div class="field"><label>Ciudad</label><input type="text" id="pl_ciudad" placeholder="Medellín" /></div>
+        <div class="field inline" style="margin-top: 24px;">
+          <input type="checkbox" id="pl_activo" /><label for="pl_activo">Solo activos</label>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn info" onclick="listarProveedores()">Listar</button>
+      </div>
+      <textarea class="out" id="pl_out" readonly></textarea>
+    </section>
+
+    <!-- About -->
+    <section class="card" id="about">
+      <h2>Acerca de</h2>
+      <p class="muted">
+        Cliente web (solo Proveedores) para los microservicios del Inventario Agrícola V2. 
+        Usa el menú superior para navegar entre operaciones CRUD y listados con filtros.
+      </p>
+      <p class="muted">Versión 1.0 • UI responsive y accesible, sin dependencias externas.</p>
+    </section>
+
+  </main>
+
+  <footer>© Inventario Agrícola V2 — Cliente Web (Proveedores)</footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
